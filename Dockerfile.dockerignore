@@ -1,0 +1,3 @@
+# Used instead of a root .dockerignore because the build context is the repo root.
+**/node_modules/
+**/dist/
