@@ -23,7 +23,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       .split(",")
       .map((email) => email.trim())
       .filter(Boolean),
-    protoPath: env.PROTO_PATH ?? "../../proto/notifications.proto",
+    protoPath: env.PROTO_PATH ?? "proto/notifications.proto",
   };
 }
 

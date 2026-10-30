@@ -1,0 +1,16 @@
+# Secretos y variables de entorno (nunca al repo)
+.env
+.env.*
+!.env.example
+
+# Sistema / editores
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Node
+node_modules/
+dist/
+coverage/
+npm-debug.log*

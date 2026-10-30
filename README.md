@@ -27,7 +27,7 @@ test/           vitest; MongoDB en memoria (mongodb-memory-server), no necesita 
 ```
 
 El `.proto` se lee **al arrancar** (con `@grpc/proto-loader`), así que no hay código
-generado. Por eso el Dockerfile copia `proto/notifications.proto` y se construye desde la raíz.
+generado. Por eso el Dockerfile copia `proto/notifications.proto`.
 
 ## Qué genera cada evento
 
@@ -58,16 +58,16 @@ duplicar la notificación. Si ya se había enviado, no se repite.
 Requisitos: Node.js 22 o superior y Docker.
 
 ```bash
-# desde la raíz del repo
+# desde TCGBackend
 docker compose up -d mongodb rabbitmq mailpit
 
-# desde services/notifications-service
+# desde este repo
 make install
 make run     # servidor en :50055, recarga al guardar cambios
 make test
 ```
 
-O todo con Docker, desde la raíz:
+O todo con Docker, desde TCGBackend:
 
 ```bash
 docker compose up -d --build notifications-service
@@ -119,7 +119,7 @@ grpcurl -plaintext -import-path node_modules/grpc-health-check/proto/health/v1 \
 | `MAIL_FROM` | `Pokémon TCG Store <no-reply@tcgstore.local>` | |
 | `ADMIN_ALERT_EMAILS` | vacía | separados por coma; en compose usa `ADMIN_EMAIL` del `.env` |
 | `GRPC_PORT` | `50055` | |
-| `PROTO_PATH` | `../../proto/notifications.proto` | en Docker, `/app/proto/notifications.proto` |
+| `PROTO_PATH` | `proto/notifications.proto` | en Docker, `/app/proto/notifications.proto` |
 
 ## Notas para quien consume este servicio
 
@@ -129,3 +129,9 @@ grpcurl -plaintext -import-path node_modules/grpc-health-check/proto/health/v1 \
 - `MarkAsRead` con ids de otro usuario no falla: simplemente no los cuenta en `updated_count`.
 - Si pierde la conexión con RabbitMQ, el proceso termina y Docker/Kubernetes lo reinicia
   (`restart: on-failure` en compose).
+
+## Contratos
+
+Los archivos de `proto/` son una **copia** de los de `TCGBackend/proto`, que es la fuente
+de verdad. No se editan aquí: el cambio se acuerda con el equipo, se hace en `TCGBackend` y
+se copia con `./scripts/sync-proto.sh` (desde TCGBackend).

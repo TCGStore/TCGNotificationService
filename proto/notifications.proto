@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package tcgstore.notifications;
+
+// Notifications are created only from RabbitMQ events, never through gRPC.
+// Admin notifications (low stock) are shared by all admins: marking one as
+// read marks it for every admin.
+service NotificationsService {
+  rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse);
+  rpc GetUnreadCount(GetUnreadCountRequest) returns (GetUnreadCountResponse);
+  rpc MarkAsRead(MarkAsReadRequest) returns (MarkAsReadResponse);
+}
+
+enum NotificationType {
+  NOTIFICATION_TYPE_UNSPECIFIED = 0;
+  NOTIFICATION_TYPE_ORDER_CREATED = 1;
+  NOTIFICATION_TYPE_ORDER_CONFIRMED = 2;
+  NOTIFICATION_TYPE_ORDER_CANCELLED = 3;
+  NOTIFICATION_TYPE_LOW_STOCK = 4;
+}
+
+message Notification {
+  string id = 1;
+  NotificationType type = 2;
+  string title = 3;
+  string message = 4;
+  bool read = 5;
+  string created_at = 6;  // RFC 3339.
+  string order_id = 7;    // Set for order notifications.
+  string product_id = 8;  // Set for low stock notifications.
+}
+
+// include_admin comes from the JWT role; the BFF sets it, never the client.
+message ListNotificationsRequest {
+  string user_id = 1;
+  bool include_admin = 2;
+  bool unread_only = 3;
+  int32 page = 4;       // 1-based. Defaults to 1.
+  int32 page_size = 5;  // Defaults to 20, max 100.
+}
+
+message ListNotificationsResponse {
+  repeated Notification notifications = 1;
+  int32 total_count = 2;
+}
+
+message GetUnreadCountRequest {
+  string user_id = 1;
+  bool include_admin = 2;
+}
+
+message GetUnreadCountResponse {
+  int32 count = 1;
+}
+
+// Empty notification_ids marks all of the user's notifications as read.
+message MarkAsReadRequest {
+  string user_id = 1;
+  bool include_admin = 2;
+  repeated string notification_ids = 3;
+}
+
+message MarkAsReadResponse {
+  int32 updated_count = 1;
+}
